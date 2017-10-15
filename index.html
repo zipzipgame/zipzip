@@ -5,27 +5,60 @@ html, body {
   padding: 0px;
   margin: 0px;
 }
-#canvas {
-  display: hidden;
-}
 </style>
 </head>
 <body>
   <canvas id="canvas"></canvas>
-  <center>
-    <input type="button" value="Start Game" onclick="startGame()">
-  </center>
 <script>
 var ctx = canvas.getContext("2d");
-function startGame() {
-  //document.body.requestFullscreen();
-  canvas.webkitRequestFullscreen();
+
+var player = {};
+var others = [];
+var game = {
+  myId: 0,
+  ball: {},
+  players: []
+};
+var socket = null;
+
+function init() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-  canvas.style.display = "";
-  canvas.strokeStyle = "red";
-  canvas.strokeRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = "red";
+  ctx.strokeRect(0, 0, canvas.width, canvas.height);
 }
+
+function initConnection() {
+  socket = new WebSocket("ws://18.18.18.18/");
+  socket.onmessage = function (event) {
+    handleMessage(JSON.parse(event.data));
+  }
+}
+
+function handleMessage(msg) {
+  switch (msg.type) {
+    case "init":
+      handleInit(msg);
+      break;
+    case "newplayer":
+      handleNewPlayer(msg);
+      break;
+    case "update":
+      handleUpdate(msg);
+      break;
+  }
+}
+
+function handleInit(msg) {
+}
+
+function handleNewPlayer(msg) {
+}
+
+function handleUpdate(msg) {
+}
+
+init();
 </script>
 </body>
 </html>
