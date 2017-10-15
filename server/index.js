@@ -33,16 +33,33 @@ wsServer.on('request', function(request) {
 	var playerID = id++;
 	var player = {id:playerID};
 	game.players.push(player);
-	
-	connection.send(JSON.stringify(game));
+	console.log(player);
+
+	let message = {
+		type: "init",
+		playerId: playerId,
+	}
+
+	connection.send(JSON.stringify(message));
 
 	connection.on('message', function(message) {
-		if (message.type === 'utf8') {
+		if (message.type === 'init') {
+			
 		}
+		connection.send(message.utf8Data));
 	});
 
 	connection.on('close', function(connection) {
 			
 	});
+
+	setInterval(function(){
+		let message = {
+			type: "update",
+			game: game
+		};
+		connection.send(JSON.stringify(message));
+	}, 3000);
 });
+
 
