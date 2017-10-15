@@ -8,28 +8,33 @@ html, body {
 </style>
 </head>
 <body>
-  <canvas id="canvas"></canvas>
+  <input type="text" placeholder="Server Address" id="dom_address">
+  <input type="submit" value="Start Game" onclick="startGame()" id="dom_start">
+  <canvas id="canvas" style="display:none;"></canvas>
 <script>
 var ctx = canvas.getContext("2d");
 
-var player = {};
-var others = [];
 var game = {
+  started: false,
   myId: 0,
   ball: {},
   players: []
 };
 var socket = null;
 
-function init() {
+function startGame() {
+  initConnection(dom_address.value);
+  dom_address.style.display = "none";
+  dom_start.style.display = "none";
+  canvas.style.display = "";
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
   ctx.strokeStyle = "red";
   ctx.strokeRect(0, 0, canvas.width, canvas.height);
 }
 
-function initConnection() {
-  socket = new WebSocket("ws://18.18.18.18/");
+function initConnection(address) {
+  socket = new WebSocket(address);
   socket.onmessage = function (event) {
     handleMessage(JSON.parse(event.data));
   }
@@ -50,12 +55,14 @@ function handleMessage(msg) {
 }
 
 function handleInit(msg) {
+  game.myId = msg.yourId;
 }
 
 function handleNewPlayer(msg) {
 }
 
 function handleUpdate(msg) {
+
 }
 
 init();
