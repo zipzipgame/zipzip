@@ -1,0 +1,64 @@
+<html>
+<head>
+<style>
+html, body {
+  padding: 0px;
+  margin: 0px;
+}
+</style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+<script>
+var ctx = canvas.getContext("2d");
+
+var player = {};
+var others = [];
+var game = {
+  myId: 0,
+  ball: {},
+  players: []
+};
+var socket = null;
+
+function init() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  ctx.strokeStyle = "red";
+  ctx.strokeRect(0, 0, canvas.width, canvas.height);
+}
+
+function initConnection() {
+  socket = new WebSocket("ws://18.18.18.18/");
+  socket.onmessage = function (event) {
+    handleMessage(JSON.parse(event.data));
+  }
+}
+
+function handleMessage(msg) {
+  switch (msg.type) {
+    case "init":
+      handleInit(msg);
+      break;
+    case "newplayer":
+      handleNewPlayer(msg);
+      break;
+    case "update":
+      handleUpdate(msg);
+      break;
+  }
+}
+
+function handleInit(msg) {
+}
+
+function handleNewPlayer(msg) {
+}
+
+function handleUpdate(msg) {
+}
+
+init();
+</script>
+</body>
+</html>
