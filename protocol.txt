@@ -1,8 +1,8 @@
 Server -> Client
-Initialization, sends game state and assigns Id: 
+Initialization, sends game state and assigns id, color etc: 
 {
   type: "init",
-  yourId: Int,
+  player: {id, x, y, color},
 }
 New Player, adds new player to the game:
 {
@@ -12,11 +12,14 @@ New Player, adds new player to the game:
 Update, updates game state periodically:
 {
   type: "update",
-  ball: {x, y, vx, vy, r},
-  players: [
-    {id, x, y, color},
+  balls: [
+    {x, y, vx, vy, r},
     ...
-  ]
+  ],
+  players: {
+    id: {x, y},
+    ...
+  }
 }
 
 Client -> Server
