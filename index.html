@@ -1,0 +1,31 @@
+<html>
+<head>
+<style>
+html, body {
+  padding: 0px;
+  margin: 0px;
+}
+#canvas {
+  display: hidden;
+}
+</style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <center>
+    <input type="button" value="Start Game" onclick="startGame()">
+  </center>
+<script>
+var ctx = canvas.getContext("2d");
+function startGame() {
+  //document.body.requestFullscreen();
+  canvas.webkitRequestFullscreen();
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  canvas.style.display = "";
+  canvas.strokeStyle = "red";
+  canvas.strokeRect(0, 0, canvas.width, canvas.height);
+}
+</script>
+</body>
+</html>
