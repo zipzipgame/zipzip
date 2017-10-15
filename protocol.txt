@@ -3,15 +3,8 @@ Initialization, sends game state and assigns Id:
 {
   type: "init",
   yourId: Int,
-  game: {
-    ball: {x, y, vx, vy, r},
-    players: [
-      {id, x, y, color},
-      ...
-    ]
-  }
 }
-New Player, adds new player to game:
+New Player, adds new player to the game:
 {
   type: "newplayer",
   player: {id, x, y, color}
