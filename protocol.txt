@@ -2,7 +2,11 @@ Server -> Client
 Initialization, sends game state and assigns id, color etc: 
 {
   type: "init",
-  player: {id, x, y, color},
+  playerId: Int,
+  players: [
+    {id, x, y, color},
+    ...
+  ]
 }
 New Player, adds new player to the game:
 {
