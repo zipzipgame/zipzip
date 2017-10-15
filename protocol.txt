@@ -12,11 +12,15 @@ New Player, adds new player to the game:
 Update, updates game state periodically:
 {
   type: "update",
-  game: {
-    ball: {x, y, vx, vy, r},
-    players: [
-      {id, x, y, color},
-      ...
-    ]
-  }
+  ball: {x, y, vx, vy, r},
+  players: [
+    {id, x, y, color},
+    ...
+  ]
+}
+
+Client -> Server
+Action:
+{
+  action: "jump" OR "left" OR "right" OR "stop"
 }
