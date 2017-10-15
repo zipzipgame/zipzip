@@ -6,21 +6,23 @@ html, body {
   margin: 0px;
 }
 </style>
+<script src="touchtomouse.js"></script>
 </head>
 <body>
-  <input type="text" placeholder="Server Address" id="dom_address">
+  <input type="text" placeholder="Server Address" id="dom_address" value="ws://18.111.103.44:1453/">
   <input type="submit" value="Start Game" onclick="startGame()" id="dom_start">
   <canvas id="canvas" style="display:none;"></canvas>
 <script>
+singleTouchToMouse(canvas, true);
 var ctx = canvas.getContext("2d");
+var socket = null;
 
 var game = {
   started: false,
   myId: 0,
-  ball: {},
+  balls: [],
   players: []
 };
-var socket = null;
 
 function startGame() {
   initConnection(dom_address.value);
@@ -56,16 +58,61 @@ function handleMessage(msg) {
 
 function handleInit(msg) {
   game.myId = msg.yourId;
+  game.players = msg.players;
 }
 
 function handleNewPlayer(msg) {
+  game.players.push(msg.player);
 }
 
 function handleUpdate(msg) {
-
+  game.balls = msg.balls;
+  for (var i = 0; i < game.players.length; i++) {
+    var player = game.players[i];
+    var msgplayer = msg.players[player.id];
+    if (msgplayer) {
+      player.x = msgplayer.x;
+      player.y = msgplayer.y;
+    }
+  }
+  render();
 }
 
-init();
+function render() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.scale(1, -1);
+  ctx.scale(canvas.width, canvas.height);
+
+  for (var i = 0; i < game.players.length; i++) {
+    var player = game.players[i];
+    ctx.strokeStyle = player.color;
+    ctx.strokeRect(player.x - .01, player.y, .02, .06);
+  }
+
+  for (var i = 0; i < game.balls.length; i++) {
+    var ball = game.balls[i];
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.r, 0, 2 * Math.PI);
+    ctx.strokeStyle = "gray";
+    ctx.stroke();
+  }
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.strokeStyle = "black";
+}
+
+canvas.onmousedown = function (e) {
+  var x = e.clientX - canvas.getBoundingClientRect().left;
+  var y = e.clientX - canvas.getBoundingClientRect().right;
+  if (x < canvas.width / 3) {
+    
+  } else if (x < canvas.width * 2 / 3) {
+
+  } else {
+
+  }
+};
 </script>
 </body>
 </html>
