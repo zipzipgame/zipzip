@@ -11,7 +11,12 @@ Initialization, sends game state and assigns id, color etc:
 New Player, adds new player to the game:
 {
   type: "newplayer",
-  player: {id, x, y, color}
+  player: {id, x, y, w, color}
+}
+Remove Player, removes player:
+{
+  type: "removeplayer",
+  playerId: Int
 }
 Update, updates game state periodically:
 {

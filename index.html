@@ -9,13 +9,14 @@ html, body {
 <script src="touchtomouse.js"></script>
 </head>
 <body>
-  <input type="text" placeholder="Server Address" id="dom_address" value="ws://18.111.103.44:1453/">
+  <input type="text" placeholder="Server Address" id="dom_address" value="ws://18.111.59.164:1453/">
   <input type="submit" value="Start Game" onclick="startGame()" id="dom_start">
   <canvas id="canvas" style="display:none;"></canvas>
 <script>
 singleTouchToMouse(canvas, true);
 var ctx = canvas.getContext("2d");
 var socket = null;
+var lastMessage;
 
 var game = {
   started: false,
@@ -43,6 +44,7 @@ function initConnection(address) {
 }
 
 function handleMessage(msg) {
+  lastMessage = msg;
   switch (msg.type) {
     case "init":
       handleInit(msg);
@@ -78,40 +80,50 @@ function handleUpdate(msg) {
   render();
 }
 
+function sendAction(action) {
+  socket.send(JSON.stringify({action: action}));
+}
+
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.translate(0, canvas.height);
   ctx.scale(1, -1);
-  ctx.scale(canvas.width, canvas.height);
+  ctx.scale(canvas.width, canvas.width);
 
   for (var i = 0; i < game.players.length; i++) {
     var player = game.players[i];
-    ctx.strokeStyle = player.color;
-    ctx.strokeRect(player.x - .01, player.y, .02, .06);
+    ctx.fillStyle = player.color;
+    ctx.fillRect(player.x - .01, player.y, .02, .06);
   }
 
   for (var i = 0; i < game.balls.length; i++) {
     var ball = game.balls[i];
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.r, 0, 2 * Math.PI);
-    ctx.strokeStyle = "gray";
-    ctx.stroke();
+    ctx.fillStyle = "gray";
+    ctx.fill();
   }
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.strokeStyle = "black";
+  ctx.strokeRect(0, 0, canvas.width, canvas.height);
 }
 
 canvas.onmousedown = function (e) {
   var x = e.clientX - canvas.getBoundingClientRect().left;
   var y = e.clientX - canvas.getBoundingClientRect().right;
   if (x < canvas.width / 3) {
-    
+    sendAction("left");
   } else if (x < canvas.width * 2 / 3) {
-
+    sendAction("jump");
   } else {
-
+    sendAction("right");
   }
+};
+
+canvas.onmouseup = function (e) {
+  sendAction("stop");
 };
 </script>
 </body>
