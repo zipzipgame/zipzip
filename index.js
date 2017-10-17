@@ -176,7 +176,64 @@ function ballCollision(b1, b2) {
   b2.vy = v2a_n * vecy + v2p * vecx;
 }
 
-function playerBallCollision() {
+function pointInBall(p, b) {
+  var dx = p.x - b.x;
+  var dy = p.y - b.y;
+  return dx * dx + dy * dy < b.r * b.r;
+}
+
+function cornerBallCollision(p, b) {
+  var dx = p.x - b.x;
+  var dy = p.y - b.y;
+  var d = Math.sqrt(dx * dx + dy * dy);
+  if (d > b.r) {
+    return;
+  }
+
+  var vecx = dx / d;
+  var vecy = dy / d;
+  // a = (vecx, vecy)
+  // p = (-vecy, vecx)
+  // Velocity along axis
+  var bva = b.vx * vecx + b.vy * vecy;
+  // Velocity perpendicular
+  var bvp = -b.vx * vecy + b.vy * vecx;
+
+  if (bva < 0) {
+    return;
+  }
+
+  var bva_n = -bva;
+
+  b.vx = bva_n * vecx - bvp * vecy;
+  b.vy = bva_n * vecy + bvp * vecx;
+}
+
+function playerBallCollision(p, b) {
+  if (p.y + p.h < b.y - b.r ||
+    p.x - p.w / 2 > b.x + b.r ||
+    p.x + p.w / 2 < b.x - b.r) {
+    return;
+  }
+
+  var c1 = {x: p.x - p.w / 2, y: p.y + p.h};
+  var c2 = {x: p.x + p.w / 2, y: p.y + p.h};
+
+  var in1 = pointInBall(c1, b);
+  var in2 = pointInBall(c2, b);
+  if (in1 && in2) {
+    if (b.vy < p.vy) {
+      b.vy = 2 * p.vy - b.vy;
+    }
+  } else if (in1) {
+    b.vy -= p.vy;
+    cornerBallCollision(c1, b);
+    b.vy += p.vy;
+  } else if (in2) {
+    b.vy -= p.vy;
+    cornerBallCollision(c2, b);
+    b.vy += p.vy;
+  }
 }
 
 let tick = function(dt) {
@@ -200,6 +257,11 @@ let tick = function(dt) {
   for (var i = 0; i < game.balls.length; i++) {
     for (var j = i + 1; j < game.balls.length; j++) {
       ballCollision(game.balls[i], game.balls[j]);
+    }
+  }
+	for (let ball of game.balls) {
+    for (let playerId in game.players) {
+      playerBallCollision(game.players[playerId], ball);
     }
   }
 	for (let playerId in game.players) {
