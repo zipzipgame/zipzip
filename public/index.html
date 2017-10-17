@@ -9,7 +9,9 @@ html, body {
 <script src="touchtomouse.js"></script>
 </head>
 <body>
+  <center>
   <input type="submit" value="Start Game" onclick="startGame()" id="dom_start">
+  </center>
   <canvas id="canvas" style="display:none;"></canvas>
 <script>
 singleTouchToMouse(canvas, true);
@@ -29,7 +31,6 @@ var game = {
 
 function startGame() {
   initConnection(HOST);
-  dom_address.style.display = "none";
   dom_start.style.display = "none";
   canvas.style.display = "";
   canvas.width = window.innerWidth;
