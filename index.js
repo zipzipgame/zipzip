@@ -89,6 +89,41 @@ wsServer.on('request', function(request) {
 
 let g = -.3; 
 
+function ballCollision(b1, b2) {
+  if (b1.x + b1.r < b2.x - b2.r ||
+    b1.x - b1.r > b2.x + b2.r ||
+    b1.y + b1.r < b2.y - b2.r ||
+    b1.y - b1.r > b2.y + b2.r) {
+    return;
+  }
+
+  var dx = b1.x - b2.x;
+  var dy = b1.y - b2.y;
+  var d = Math.sqrt(dx * dx + dy * dy);
+  if (d > b1.r + b2.r) {
+    return;
+  }
+
+  var vecx = dx / d;
+  var vecy = dy / d;
+
+  // Velocity along axis
+  var b1va = b1.vx * vecx + b1.vy * vecy;
+  var b2va = b2.vx * vecx + b2.vy * vecy;
+  // Velocity perpendicular
+  var b1vp = -b1.vx * vecy + b1.vy * vecx;
+  var b2vp = -b2.vx * vecy + b2.vy * vecx;
+  
+  if (b1vp < b2vp) {
+    return;
+  }
+
+  var m1 = b1.r;
+  var m2 = b2.r;
+
+  
+}
+
 let tick = function(dt) {
 	for (let ball of game.balls) {
 		ball.vy += g * dt;
@@ -99,6 +134,12 @@ let tick = function(dt) {
 			ball.vy = -ball.vy;
 		}
 	}
+  for (var i = 0; i < game.balls.length; i++) {
+    for (var j = i + 1; j < game.balls.length; i++) {
+      let b1 = game.balls[i];
+      let b2 = game.balls[j];
+    }
+  }
 	for (let playerId in game.players) {
 		var player = game.players[playerId];
 		player.vy += g * dt;
