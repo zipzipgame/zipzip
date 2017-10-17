@@ -37,6 +37,9 @@ wsServer.on('request', function(request) {
 		x: 0.2,
 		y: 0.1,
 		w: 0.0001,
+		vx: 0.0,
+		vy: 0.0,
+		moveState: 'stop',
 		color: colors[id%colors.length],
 	};
 	connections[playerId] = connection;
@@ -55,10 +58,15 @@ wsServer.on('request', function(request) {
 	connection.on('message', function(message) {
 		let action = JSON.parse(message.utf8Data)['action'];
 		if (action === 'jump') {
+			if (connections[playerId].y <= 0.001) {
+				connections[playerId].vy += 0.001;
+			}
 			console.log('jump');
 		} else if (action === 'left') {
+			connections[playerId].moveState = 'left';
 			console.log('left');
 		} else if (action === 'right') {
+			connection[playerId].moveState = 'right';
 			console.log('right');
 		} else if (action === 'stop') {
 			console.log('stop');
@@ -81,6 +89,18 @@ let tick = function(dt) {
 		ball.y += ball.vy * dt;
 		if (ball.vy < 0 && ball.y - ball.r < 0) {
 			ball.vy = -ball.vy;
+		}
+	}
+	for (let player of game.players) {
+		player.vy += g * dt;
+		player.y += player.vy * dt;
+		if (player.vy < 0 && player.y < 0) {
+			player.vy = -player.vy;
+		}
+		if (player.moveState == 'right') {
+			player.x = Math.max(0, player.x - 0.2*dt);
+		} else if (player.moveState == 'left') {
+			player.x = Math.min(1, player.x + 0.2*dt);
 		}
 	}
 }
