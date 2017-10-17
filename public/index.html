@@ -46,8 +46,7 @@ function startGame() {
     return;
   }
   sendInit(nick);
-  dom_start.style.display = "none";
-  dom_nick.style.display = "none";
+  dom_initdiv.style.display = "none";
   ctx.strokeStyle = "red";
   ctx.strokeRect(0, 0, canvas.width, canvas.height);
 }
