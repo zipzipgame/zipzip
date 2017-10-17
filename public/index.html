@@ -10,10 +10,12 @@ html, body {
 <script src="touchtomouse.js"></script>
 </head>
 <body>
-  <canvas id="canvas"></canvas>
+  <canvas id="canvas" style="z-index: 0"></canvas>
   <center>
+  <div id="dom_initdiv" style="z-index: 100">
   <input type="text" placeholder="Nick" id="dom_nick"><br>
   <input type="submit" value="Start Game" onclick="startGame()" id="dom_start">
+  </div>
   </center>
 <script>
 singleTouchToMouse(canvas, true);
