@@ -1,10 +1,8 @@
 var WebSocketServer = require('websocket').server;
 var http = require('http');
 var express = require('express');
-var path = require('path');
 
 const PORT = process.env.PORT || 3000;
-const INDEX = path.join(__dirname, 'index.html');
 
 const server = express()
   .use(express.static(__dirname + '/public'))
