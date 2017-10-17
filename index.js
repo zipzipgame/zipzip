@@ -170,11 +170,11 @@ let tick = function(dt) {
 			ball.vy = -ball.vy;
 		}
     if (ball.x - ball.r < 0 && ball.vx < 0) {
-      ball.x -= ball.vx;
+      ball.x -= ball.vx * dx;
       ball.vx = Math.abs(ball.vx);
     }
     if (ball.x + ball.r > 1 && ball.vx > 0) {
-      ball.x -= ball.vx;
+      ball.x -= ball.vx * dx;
       ball.vx = -Math.abs(ball.vx);
     }
 	}

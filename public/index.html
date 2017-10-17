@@ -69,6 +69,7 @@ function handleMessage(msg) {
 
 function handleInit(msg) {
   game.myId = msg.yourId;
+  game.balls = msg.balls;
   game.players = msg.players;
 }
 
