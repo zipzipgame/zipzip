@@ -111,7 +111,7 @@ wsServer.on('request', function(request) {
 		console.log('Player ' + playerId + ' has disconnected.');
 		delete connections[playerId];
 		let message = {type: "removeplayer", playerId: playerId};
-		sendtoAll(message);
+		sendToAll(message);
 	});
 });
 
