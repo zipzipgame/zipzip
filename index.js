@@ -30,8 +30,8 @@ var game = {
 };
 
 var CONSTS = {
-  VX: .02,
-  JUMP_V: .1,
+  VX: .2,
+  JUMP_V: .25,
   G: -.3
 };
 
