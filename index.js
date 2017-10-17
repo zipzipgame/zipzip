@@ -1,13 +1,14 @@
 var WebSocketServer = require('websocket').server;
 var http = require('http');
 var express = require('express');
+var path = require('path');
 
 const PORT = process.env.PORT || 3000;
 const INDEX = path.join(__dirname, 'index.html');
 
 const server = express()
   .use((req, res) => res.sendFile(INDEX))
-  .listen(PORT, () => console.log('Listening on ${PORT}');
+  .listen(PORT, () => console.log('Listening on ' + PORT));
 
 wsServer = new WebSocketServer({
 	httpServer: server
