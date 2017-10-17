@@ -51,7 +51,7 @@ wsServer.on('request', function(request) {
 	msgPlayers = []
 	for (var p in game.players) {
 		let pl = game.players[p];
-		msgPlayers += {id: pl.id, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color};
+		msgPlayers.push({id: pl.id, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color});
 	}
 
 	let message = {
@@ -65,7 +65,7 @@ wsServer.on('request', function(request) {
 	connection.on('message', function(message) {
 		let action = JSON.parse(message.utf8Data)['action'];
 		if (action === 'jump') {
-			if (game.players[playerId].y <= 0.001) {
+			if (game.players[playerId].y <= 0.11) {
 				game.players[playerId].vy += 0.001;
 			}
 			console.log('jump');
@@ -76,6 +76,7 @@ wsServer.on('request', function(request) {
 			game.players[playerId].moveState = 'right';
 			console.log('right');
 		} else if (action === 'stop') {
+			game.players[playerId].moveState = 'stop';
 			console.log('stop');
 		}
 	});
@@ -145,12 +146,12 @@ let tick = function(dt) {
 		player.vy += g * dt;
 		player.y += player.vy * dt;
 		if (player.vy < 0 && player.y < 0) {
-      player.y -= player.vy * dt;
+			player.y -= player.vy * dt;
 			player.vy = 0;
 		}
-		if (player.moveState == 'right') {
+		if (player.moveState == 'left') {
 			player.x = Math.max(0, player.x - 0.2*dt);
-		} else if (player.moveState == 'left') {
+		} else if (player.moveState == 'right') {
 			player.x = Math.min(1, player.x + 0.2*dt);
 		}
 	}
