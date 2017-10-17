@@ -23,7 +23,7 @@ var game = {
 		x:   0.1,
 		y:   0.8,
 		vy: -0.01,
-		vx:  0.06,
+		vx:  0.03,
 		r:   0.05,
 	}],
 	players: {},
@@ -108,8 +108,8 @@ function ballCollision(b1, b2) {
     return;
   }
 
-  var dx = b1.x - b2.x;
-  var dy = b1.y - b2.y;
+  var dx = b2.x - b1.x;
+  var dy = b2.y - b1.y;
   var d = Math.sqrt(dx * dx + dy * dy);
   if (d > b1.r + b2.r) {
     return;
