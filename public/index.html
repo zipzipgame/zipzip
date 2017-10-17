@@ -208,7 +208,7 @@ document.onkeydown = function (e) {
   }
 }
 
-document.onkeydown = function (e) {
+document.onkeyup = function (e) {
   if (e.keyCode == 37 && buttonState.left == true) {
     sendAction("stop");
     buttonState.left = false;
