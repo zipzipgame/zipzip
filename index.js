@@ -252,6 +252,11 @@ let tick = function(dt) {
       ballCollision(game.balls[i], game.balls[j]);
     }
   }
+	for (let ball of game.balls) {
+    for (let playerId in game.players) {
+      playerBallCollision(game.players[playerId], ball);
+    }
+  }
 	for (let playerId in game.players) {
 		var player = game.players[playerId];
     if (player.y > 0) {
