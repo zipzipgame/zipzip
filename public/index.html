@@ -162,21 +162,65 @@ function render() {
   ctx.strokeRect(0, 0, canvas.width, canvas.height);
 }
 
-canvas.onmousedown = function (e) {
-  var x = e.clientX - canvas.getBoundingClientRect().left;
-  var y = e.clientX - canvas.getBoundingClientRect().right;
+var buttonState = {
+  left: false,
+  right: false,
+  jump: false
+};
+
+canvas.ontouchstart = function (e) {
+  var x = e.target.clientX - canvas.getBoundingClientRect().left;
+  var y = e.target.clientX - canvas.getBoundingClientRect().right;
   if (x < canvas.width / 3) {
     sendAction("left");
+    buttonState.left = e.target.identifier;
   } else if (x < canvas.width * 2 / 3) {
     sendAction("jump");
   } else {
     sendAction("right");
+    buttonState.right = e.target.identifier;
   }
 };
 
-canvas.onmouseup = function (e) {
-  sendAction("stop");
+canvas.ontouchend = canvas.ontouchcancel = function (e) {
+  if (e.target.identifier == buttonState.left) {
+    sendAction("stop");
+    buttonState.left = false;
+  }
+  if (e.target.identifier == buttonState.right) {
+    sendAction("stop");
+    buttonState.right = false;
+  }
 };
+
+document.onkeydown = function (e) {
+  if (e.keyCode == 37 && buttonState.left == false) {
+    sendAction("left");
+    buttonState.left = true;
+  }
+  if (e.keyCode == 38 && buttonState.jump == false) {
+    sendAction("jump");
+    buttonState.jump = true;
+  }
+  if (e.keyCode == 39 && buttonState.right == false) {
+    sendAction("right");
+    buttonState.right = true;
+  }
+}
+
+document.onkeydown = function (e) {
+  if (e.keyCode == 37 && buttonState.left == true) {
+    sendAction("stop");
+    buttonState.left = false;
+  }
+  if (e.keyCode == 38 && buttonState.jump == true) {
+    buttonState.jump = false;
+  }
+  if (e.keyCode == 39 && buttonState.right == true) {
+    sendAction("stop");
+    buttonState.right = false;
+  }
+}
 </script>
 </body>
 </html>
