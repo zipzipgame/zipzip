@@ -37,6 +37,7 @@ wsServer.on('request', function(request) {
 		x: 0.2,
 		y: 0.1,
 		w: 0.0001,
+		h: 0.0002,
 		vx: 0.0,
 		vy: 0.0,
 		moveState: 'stop',
@@ -47,10 +48,16 @@ wsServer.on('request', function(request) {
 	game.players[playerId] = player;
 	console.log("Player " + playerId + " has connected.");
 
+	msgPlayers = []
+	for (var p in game.players) {
+		let pl = game.players[p];
+		msgPlayers += {id: pl.id, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color};
+	}
+
 	let message = {
 		type: "init",
 		playerId: playerId,
-		players: game.players,
+		players: msgPlayers,
 	}
 
 	connection.send(JSON.stringify(message));
