@@ -1,16 +1,13 @@
 var WebSocketServer = require('websocket').server;
 var http = require('http');
+var express = require('express');
 
-var server = http.createServer(function(request, response) {
+const PORT = process.env.PORT || 3000;
+const INDEX = path.join(__dirname, 'index.html');
 
-});
-
-http.createServer(function (req, res) {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-    res.end('Hello World!');
-}).listen(80);
-
-server.listen(3000, function () { });
+const server = express()
+  .use((req, res) => res.sendFile(INDEX))
+  .listen(PORT, () => console.log('Listening on ${PORT}');
 
 wsServer = new WebSocketServer({
 	httpServer: server
