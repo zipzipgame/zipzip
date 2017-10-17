@@ -55,6 +55,9 @@ function handleMessage(msg) {
     case "newplayer":
       handleNewPlayer(msg);
       break;
+    case "removeplayer":
+      handleRemovePlayer(msg);
+      break;
     case "update":
       handleUpdate(msg);
       break;
@@ -68,6 +71,15 @@ function handleInit(msg) {
 
 function handleNewPlayer(msg) {
   game.players.push(msg.player);
+}
+
+function handleRemovePlayer(msg) {
+  for (var i = 0; i < game.players.length; i++) {
+    if (game.players[i].id == msg.playerId) {
+      game.players.splice(i, 1);
+      break;
+    }
+  }
 }
 
 function handleUpdate(msg) {
@@ -97,7 +109,7 @@ function render() {
   for (var i = 0; i < game.players.length; i++) {
     var player = game.players[i];
     ctx.fillStyle = player.color;
-    ctx.fillRect(player.x - .01, player.y, .02, .06);
+    ctx.fillRect(player.x - player.w / 2, player.y, player.w, player.h);
   }
 
   for (var i = 0; i < game.balls.length; i++) {

@@ -29,6 +29,12 @@ var game = {
 	players: {},
 };
 
+var CONSTS = {
+  VX: .2,
+  JUMP_V: .25,
+  G: -.3
+};
+
 id = 2;
 
 colors = ['blue', 'red', 'purple', 'cyan', 'yellow', 'pink', 'black'];
@@ -48,12 +54,12 @@ wsServer.on('request', function(request) {
 		id: playerId,
 		x: 0.2,
 		y: 0.1,
-		w: 0.0001,
-		h: 0.0002,
+		w: 0.02,
+		h: 0.06,
 		vx: 0.0,
 		vy: 0.0,
 		moveState: 'stop',
-		color: colors[id%colors.length],
+		color: colors[id % colors.length],
 	};
 	var pl = player;
 	let message = {
@@ -85,8 +91,8 @@ wsServer.on('request', function(request) {
 	connection.on('message', function(message) {
 		let action = JSON.parse(message.utf8Data)['action'];
 		if (action === 'jump') {
-			if (game.players[playerId].y <= 0.11) {
-				game.players[playerId].vy += 0.001;
+			if (game.players[playerId].y == 0) {
+				game.players[playerId].vy = CONSTS.JUMP_V;
 			}
 			console.log('jump');
 		} else if (action === 'left') {
@@ -109,8 +115,6 @@ wsServer.on('request', function(request) {
 	});
 });
 
-
-let g = -.3; 
 
 function ballCollision(b1, b2) {
   if (b1.x + b1.r < b2.x - b2.r ||
@@ -157,7 +161,7 @@ function ballCollision(b1, b2) {
 
 let tick = function(dt) {
 	for (let ball of game.balls) {
-		ball.vy += g * dt;
+		ball.vy += CONSTS.G * dt;
 		ball.x += ball.vx * dt;
 		ball.y += ball.vy * dt;
 		if (ball.vy < 0 && ball.y - ball.r < 0) {
@@ -166,23 +170,24 @@ let tick = function(dt) {
 		}
 	}
   for (var i = 0; i < game.balls.length; i++) {
-    for (var j = i + 1; j < game.balls.length; i++) {
-      let b1 = game.balls[i];
-      let b2 = game.balls[j];
+    for (var j = i + 1; j < game.balls.length; j++) {
+      ballCollision(game.balls[i], game.balls[j]);
     }
   }
 	for (let playerId in game.players) {
 		var player = game.players[playerId];
-		player.vy += g * dt;
+    if (player.y > 0) {
+		  player.vy += CONSTS.G * dt;
+    }
 		player.y += player.vy * dt;
 		if (player.vy < 0 && player.y < 0) {
-			player.y -= player.vy * dt;
+      player.y = 0;
 			player.vy = 0;
 		}
 		if (player.moveState == 'left') {
-			player.x = Math.max(0, player.x - 0.2*dt);
+			player.x = Math.max(0, player.x - CONSTS.VX * dt);
 		} else if (player.moveState == 'right') {
-			player.x = Math.min(1, player.x + 0.2*dt);
+			player.x = Math.min(1, player.x + CONSTS.VX * dt);
 		}
 	}
 }

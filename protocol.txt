@@ -3,6 +3,10 @@ Initialization, sends game state and assigns id, color etc:
 {
   type: "init",
   playerId: Int,
+  balls: [
+    {x, y, vx, vy, r},
+    ...
+  ],
   players: [
     {id, x, y, w, h, color},
     ...
