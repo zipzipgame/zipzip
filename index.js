@@ -117,6 +117,13 @@ wsServer.on('request', function(request) {
 		}
 	});
 
+	connection.on('error', function(connection) {
+		console.log('Player ' + playerId + ' has disconnected with error.');
+		delete connections[playerId];
+		let message = {type: "removeplayer", playerId: playerId};
+		sendToAll(message);
+	});
+
 	connection.on('close', function(connection) {
 		console.log('Player ' + playerId + ' has disconnected.');
 		delete connections[playerId];
