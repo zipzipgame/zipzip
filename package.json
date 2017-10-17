@@ -14,12 +14,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/abeakkas/zipzip.git"
+    "url": "git+https://github.com/zipzipgame/zipzip.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/abeakkas/zipzip/issues"
+    "url": "https://github.com/zipzipgame/zipzip/issues"
   },
-  "homepage": "https://github.com/abeakkas/zipzip#readme"
+  "homepage": "https://github.com/zipzipgame/zipzip#readme"
 }
