@@ -143,8 +143,7 @@ let tick = function(dt) {
 	}
   for (var i = 0; i < game.balls.length; i++) {
     for (var j = i + 1; j < game.balls.length; j++) {
-      let b1 = game.balls[i];
-      let b2 = game.balls[j];
+      ballCollision(game.balls[i], game.balls[j]);
     }
   }
 	for (let playerId in game.players) {
