@@ -58,15 +58,15 @@ wsServer.on('request', function(request) {
 	connection.on('message', function(message) {
 		let action = JSON.parse(message.utf8Data)['action'];
 		if (action === 'jump') {
-			if (game.player[playerId].y <= 0.001) {
-				game.player[playerId].vy += 0.001;
+			if (game.players[playerId].y <= 0.001) {
+				game.players[playerId].vy += 0.001;
 			}
 			console.log('jump');
 		} else if (action === 'left') {
-			game.player[playerId].moveState = 'left';
+			game.players[playerId].moveState = 'left';
 			console.log('left');
 		} else if (action === 'right') {
-			connections[playerId].moveState = 'right';
+			game.players[playerId].moveState = 'right';
 			console.log('right');
 		} else if (action === 'stop') {
 			console.log('stop');
@@ -113,7 +113,8 @@ setInterval(function(){
 	tick(0.025);
 	let abemal = {};
 	for (let playerId in game.players) {
-		abemal[p] = {x: p.x, y: p.y};
+		var p = game.players[playerId];
+		abemal[p.id] = {x: p.x, y: p.y};
 	}
 	let message = {
 		type: "update",
