@@ -88,6 +88,7 @@ let tick = function(dt) {
 		ball.x += ball.vx * dt;
 		ball.y += ball.vy * dt;
 		if (ball.vy < 0 && ball.y - ball.r < 0) {
+      ball.y -= ball.vy * dt;
 			ball.vy = -ball.vy;
 		}
 	}
@@ -95,7 +96,8 @@ let tick = function(dt) {
 		player.vy += g * dt;
 		player.y += player.vy * dt;
 		if (player.vy < 0 && player.y < 0) {
-			player.vy = -player.vy;
+      player.y -= player.vy * dt;
+			player.vy = 0;
 		}
 		if (player.moveState == 'right') {
 			player.x = Math.max(0, player.x - 0.2*dt);
