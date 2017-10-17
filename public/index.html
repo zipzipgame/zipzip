@@ -9,10 +9,11 @@ html, body {
 <script src="touchtomouse.js"></script>
 </head>
 <body>
+  <canvas id="canvas"></canvas>
   <center>
+  <input type="text" placeholder="Nick" id="dom_nick"><br>
   <input type="submit" value="Start Game" onclick="startGame()" id="dom_start">
   </center>
-  <canvas id="canvas" style="display:none;"></canvas>
 <script>
 singleTouchToMouse(canvas, true);
 
@@ -30,12 +31,20 @@ var game = {
   players: []
 };
 
+var nicks = ["banjo", "reis", "kuki", "mustaa", "emes", "ertem", "patates", "lombak"];
+dom_nick.value = nicks[Math.floor(Math.random() * nicks.length)];
+
+initConnection(HOST);
+
 function startGame() {
-  initConnection(HOST);
+  var nick = dom_nick.value;
+  if (nick == "") {
+    alert("Nick cannot be empty!");
+    return;
+  }
+  sendInit(nick);
   dom_start.style.display = "none";
-  canvas.style.display = "";
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  dom_nick.style.display = "none";
   ctx.strokeStyle = "red";
   ctx.strokeRect(0, 0, canvas.width, canvas.height);
 }
@@ -99,11 +108,24 @@ function handleUpdate(msg) {
   render();
 }
 
+function sendInit(nick) {
+  socket.send(JSON.stringify({
+    type: "init", name: nick
+  }));
+}
+
 function sendAction(action) {
-  socket.send(JSON.stringify({action: action}));
+  socket.send(JSON.stringify({
+    type: "action", action: action
+  }));
 }
 
 function render() {
+  if (canvas.width != window.innerWidth ||
+    canvas.height != window.innerHeight) {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.translate(0, canvas.height);
