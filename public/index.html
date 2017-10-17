@@ -149,6 +149,15 @@ function render() {
   }
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+  ctx.font="20px Arial";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "bottom";
+  ctx.fillStyle = "black";
+  for (var i = 0; i < game.players.length; i++) {
+    ctx.fillText(player.name, player.x * canvas.width, canvas.height - (player.y + player.h * 1.1) * canvas.width);
+  }
+
   ctx.strokeStyle = "black";
   ctx.strokeRect(0, 0, canvas.width, canvas.height);
 }

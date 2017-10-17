@@ -31,9 +31,10 @@ var game = {
 
 var CONSTS = {
   VX: .2,
-  JUMP_V: .25,
+  JUMP_V: .4,
   BALLG: -.3,
-  PLAYERG: -.7
+  PLAYERG: -1.4,
+  BALL_MAXV: .5,
 };
 
 id = 2;
@@ -219,19 +220,25 @@ function playerBallCollision(p, b) {
       b.vy = 2 * p.vy - b.vy;
     }
   } else if (in1) {
-    b.vy -= p.vy;
     cornerBallCollision(c1, b);
-    b.vy += p.vy;
+    if (p.vy > 0 && b.vy < p.vy / 2) {
+      b.vy += p.vy / 5;
+    }
   } else if (in2) {
-    b.vy -= p.vy;
     cornerBallCollision(c2, b);
-    b.vy += p.vy;
+    if (p.vy > 0 && b.vy < p.vy / 2) {
+      b.vy += p.vy / 5;
+    }
   }
 }
 
 let tick = function(dt) {
 	for (let ball of game.balls) {
 		ball.vy += CONSTS.BALLG * dt;
+    if (ball.vx > CONSTS.BALL_MAXV) ball.vx = CONSTS.BALL_MAXV;
+    if (ball.vx < -CONSTS.BALL_MAXV) ball.vx = -CONSTS.BALL_MAXV;
+    if (ball.vy > CONSTS.BALL_MAXV) ball.vy = CONSTS.BALL_MAXV;
+    if (ball.vy < -CONSTS.BALL_MAXV) ball.vy = -CONSTS.BALL_MAXV;
 		ball.x += ball.vx * dt;
 		ball.y += ball.vy * dt;
 		if (ball.vy < 0 && ball.y - ball.r < 0) {
