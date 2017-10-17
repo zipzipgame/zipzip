@@ -20,7 +20,7 @@ var game = {
 		vx:  0.0,
 		r:   0.07,
 	}],
-	players: [],
+	players: {},
 };
 
 id = 2;
@@ -44,7 +44,7 @@ wsServer.on('request', function(request) {
 	};
 	connections[playerId] = connection;
 
-	game.players.push(player);
+	game.players[playerId] = player;
 	console.log("Player " + playerId + " has connected.");
 
 	let message = {
@@ -58,15 +58,15 @@ wsServer.on('request', function(request) {
 	connection.on('message', function(message) {
 		let action = JSON.parse(message.utf8Data)['action'];
 		if (action === 'jump') {
-			if (connections[playerId].y <= 0.001) {
-				connections[playerId].vy += 0.001;
+			if (game.players[playerId].y <= 0.001) {
+				game.players[playerId].vy += 0.001;
 			}
 			console.log('jump');
 		} else if (action === 'left') {
-			connections[playerId].moveState = 'left';
+			game.players[playerId].moveState = 'left';
 			console.log('left');
 		} else if (action === 'right') {
-			connections[playerId].moveState = 'right';
+			game.players[playerId].moveState = 'right';
 			console.log('right');
 		} else if (action === 'stop') {
 			console.log('stop');
@@ -133,7 +133,8 @@ let tick = function(dt) {
       let b2 = game.balls[j];
     }
   }
-	for (let player of game.players) {
+	for (let playerId in game.players) {
+		var player = game.players[playerId];
 		player.vy += g * dt;
 		player.y += player.vy * dt;
 		if (player.vy < 0 && player.y < 0) {
@@ -152,7 +153,8 @@ let tick = function(dt) {
 setInterval(function(){
 	tick(0.025);
 	let abemal = {};
-	for (let p of game.players) {
+	for (let playerId in game.players) {
+		var p = game.players[playerId];
 		abemal[p.id] = {x: p.x, y: p.y};
 	}
 	let message = {
