@@ -10,7 +10,7 @@ http.createServer(function (req, res) {
     res.end('Hello World!');
 }).listen(8080);
 
-server.listen(1453, function () { });
+server.listen(3000, function () { });
 
 wsServer = new WebSocketServer({
 	httpServer: server
