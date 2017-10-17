@@ -19,6 +19,12 @@ var game = {
 		vy: -0.01,
 		vx:  0.0,
 		r:   0.07,
+	}, {
+		x:   0.1,
+		y:   0.8,
+		vy: -0.01,
+		vx:  0.06,
+		r:   0.05,
 	}],
 	players: {},
 };
@@ -108,21 +114,29 @@ function ballCollision(b1, b2) {
   var vecx = dx / d;
   var vecy = dy / d;
 
+  // a = (vecx, vecy)
+  // p = (-vecy, vecx)
   // Velocity along axis
-  var b1va = b1.vx * vecx + b1.vy * vecy;
-  var b2va = b2.vx * vecx + b2.vy * vecy;
+  var v1a = b1.vx * vecx + b1.vy * vecy;
+  var v2a = b2.vx * vecx + b2.vy * vecy;
   // Velocity perpendicular
-  var b1vp = -b1.vx * vecy + b1.vy * vecx;
-  var b2vp = -b2.vx * vecy + b2.vy * vecx;
+  var v1p = -b1.vx * vecy + b1.vy * vecx;
+  var v2p = -b2.vx * vecy + b2.vy * vecx;
   
-  if (b1vp < b2vp) {
+  if (v1a < v2a) {
     return;
   }
 
   var m1 = b1.r;
   var m2 = b2.r;
 
-  
+  var v1a_n = ((m1 - m2) * v1a + 2 * m2 * v2a) / (m1 + m2);
+  var v2a_n = v1a + v1a_n - v2a;
+
+  b1.vx = v1a_n * vecx - v1p * vecy;
+  b1.vy = v1a_n * vecy + v1p * vecx;
+  b2.vx = v2a_n * vecx - v2p * vecy;
+  b2.vy = v2a_n * vecy + v2p * vecx;
 }
 
 let tick = function(dt) {
