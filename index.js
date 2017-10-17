@@ -50,34 +50,16 @@ var sendToAll = function (msg) {
 
 wsServer.on('request', function(request) {
 	var connection = request.accept(null, request.origin);
-	var playerId = id++;
-	var player = {
-		id: playerId,
-		x: 0.2,
-		y: 0.1,
-		w: 0.02,
-		h: 0.06,
-		vx: 0.0,
-		vy: 0.0,
-		moveState: 'stop',
-		color: colors[id % colors.length],
-	};
-	var pl = player;
-	let message = {
-			type: 'newplayer',
-			player: {id: pl.id, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color},
-	};
-	sendToAll(message);
-
 	connections[playerId] = connection;
+	var playerId = id++;
+	
 
-	game.players[playerId] = player;
 	console.log("Player " + playerId + " has connected.");
 
 	msgPlayers = [];
 	for (var p in game.players) {
 		let pl = game.players[p];
-		msgPlayers.push({id: pl.id, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color});
+		msgPlayers.push({id: pl.id, name:pl.name, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color});
 	}
 
 	message = {
@@ -90,21 +72,45 @@ wsServer.on('request', function(request) {
 	connection.send(JSON.stringify(message));
 
 	connection.on('message', function(message) {
-		let action = JSON.parse(message.utf8Data)['action'];
-		if (action === 'jump') {
-			if (game.players[playerId].y == 0) {
-				game.players[playerId].vy = CONSTS.JUMP_V;
-			}
-			console.log('jump');
-		} else if (action === 'left') {
-			game.players[playerId].moveState = 'left';
-			console.log('left');
-		} else if (action === 'right') {
-			game.players[playerId].moveState = 'right';
-			console.log('right');
-		} else if (action === 'stop') {
-			game.players[playerId].moveState = 'stop';
-			console.log('stop');
+		if (message.type === 'init') {
+			var player = {
+				id: playerId,
+				name: message.name,
+				x: 0.2,
+				y: 0.1,
+				w: 0.02,
+				h: 0.06,
+				vx: 0.0,
+				vy: 0.0,
+				moveState: 'stop',
+				color: colors[id % colors.length],
+			};
+			var pl = player;
+			let message = {
+				type: 'newplayer',
+				player: {id: pl.id, name: pls.name, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color},
+			};
+			sendToAll(message);
+
+			game.players[playerId] = player;
+		}
+		if (message.type === 'action') {
+				let action = JSON.parse(message.utf8Data)['action'];
+				if (action === 'jump') {
+					if (game.players[playerId].y == 0) {
+						game.players[playerId].vy = CONSTS.JUMP_V;
+					}
+					console.log('jump');
+				} else if (action === 'left') {
+					game.players[playerId].moveState = 'left';
+					console.log('left');
+				} else if (action === 'right') {
+					game.players[playerId].moveState = 'right';
+					console.log('right');
+				} else if (action === 'stop') {
+					game.players[playerId].moveState = 'stop';
+					console.log('stop');
+				}
 		}
 	});
 
