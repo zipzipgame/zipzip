@@ -48,7 +48,7 @@ function initConnection(address) {
 }
 
 function handleMessage(msg) {
-  if (messageLogging) {
+  if (messageLogging && msg.type != "update") {
     console.log(msg);
   }
   switch (msg.type) {
