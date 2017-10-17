@@ -42,6 +42,12 @@ colors = ['blue', 'red', 'purple', 'cyan', 'yellow', 'pink', 'black'];
 
 connections = {};
 
+var sendToAll = function (msg) {
+	for (var c in connections) {
+		connections[c].send(JSON.stringify(msg));
+	}
+}
+
 wsServer.on('request', function(request) {
 	var connection = request.accept(null, request.origin);
 	var playerId = id++;
@@ -56,23 +62,31 @@ wsServer.on('request', function(request) {
 		moveState: 'stop',
 		color: colors[id % colors.length],
 	};
+	var pl = player;
+	let message = {
+			type: 'newplayer',
+			player: {id: pl.id, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color},
+	};
+	sendToAll(message);
+
 	connections[playerId] = connection;
 
 	game.players[playerId] = player;
 	console.log("Player " + playerId + " has connected.");
 
-	msgPlayers = []
+	msgPlayers = [];
 	for (var p in game.players) {
 		let pl = game.players[p];
 		msgPlayers.push({id: pl.id, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color});
 	}
 
-	let message = {
+	message = {
 		type: "init",
 		playerId: playerId,
 		players: msgPlayers,
+		balls: game.balls,
 	}
-
+	
 	connection.send(JSON.stringify(message));
 
 	connection.on('message', function(message) {
@@ -97,6 +111,8 @@ wsServer.on('request', function(request) {
 	connection.on('close', function(connection) {
 		console.log('Player ' + playerId + ' has disconnected.');
 		delete connections[playerId];
+		let message = {type: "removeplayer", playerId: playerId};
+		sendToAll(message);
 	});
 });
 
@@ -198,9 +214,7 @@ setInterval(function(){
 		balls: game.balls,
 		players: abemal,
 	};
-	for (let i in connections) {
-		connections[i].send(JSON.stringify(message));
-	}
+	sendToAll(message);
 }, 25);
 
 
