@@ -50,9 +50,9 @@ var sendToAll = function (msg) {
 
 wsServer.on('request', function(request) {
 	var connection = request.accept(null, request.origin);
-	connections[playerId] = connection;
 	var playerId = id++;
 	
+	connections[playerId] = connection;
 
 	console.log("Player " + playerId + " has connected.");
 
@@ -72,7 +72,10 @@ wsServer.on('request', function(request) {
 	connection.send(JSON.stringify(message));
 
 	connection.on('message', function(message) {
+		var message = JSON.parse(message.utf8Data);
+		console.log(message.type);
 		if (message.type === 'init') {
+				console.log(message);
 			var player = {
 				id: playerId,
 				name: message.name,
@@ -86,16 +89,16 @@ wsServer.on('request', function(request) {
 				color: colors[id % colors.length],
 			};
 			var pl = player;
-			let message = {
+			let msg = {
 				type: 'newplayer',
-				player: {id: pl.id, name: pls.name, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color},
+				player: {id: pl.id, name: pl.name, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color},
 			};
-			sendToAll(message);
+			sendToAll(msg);
 
 			game.players[playerId] = player;
 		}
 		if (message.type === 'action') {
-				let action = JSON.parse(message.utf8Data)['action'];
+				let action = message.action;
 				if (action === 'jump') {
 					if (game.players[playerId].y == 0) {
 						game.players[playerId].vy = CONSTS.JUMP_V;
