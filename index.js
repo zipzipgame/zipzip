@@ -66,7 +66,7 @@ wsServer.on('request', function(request) {
 			connections[playerId].moveState = 'left';
 			console.log('left');
 		} else if (action === 'right') {
-			connection[playerId].moveState = 'right';
+			connections[playerId].moveState = 'right';
 			console.log('right');
 		} else if (action === 'stop') {
 			console.log('stop');
