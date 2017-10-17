@@ -18,9 +18,10 @@ singleTouchToMouse(canvas, true);
 
 var HOST = location.origin.replace(/^http/, 'ws');
 
+var messageLogging = false;
+
 var ctx = canvas.getContext("2d");
 var socket = null;
-var lastMessage;
 
 var game = {
   started: false,
@@ -47,7 +48,9 @@ function initConnection(address) {
 }
 
 function handleMessage(msg) {
-  lastMessage = msg;
+  if (messageLogging) {
+    console.log(msg);
+  }
   switch (msg.type) {
     case "init":
       handleInit(msg);

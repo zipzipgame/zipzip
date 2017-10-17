@@ -21,7 +21,7 @@ var game = {
 		r:   0.07,
 	}, {
 		x:   0.1,
-		y:   0.8,
+		y:   0.3,
 		vy: -0.01,
 		vx:  0.03,
 		r:   0.05,
@@ -32,7 +32,8 @@ var game = {
 var CONSTS = {
   VX: .2,
   JUMP_V: .25,
-  G: -.3
+  BALLG: -.3,
+  PLAYERG: -.7
 };
 
 id = 2;
@@ -145,13 +146,21 @@ function ballCollision(b1, b2) {
 
 let tick = function(dt) {
 	for (let ball of game.balls) {
-		ball.vy += CONSTS.G * dt;
+		ball.vy += CONSTS.BALLG * dt;
 		ball.x += ball.vx * dt;
 		ball.y += ball.vy * dt;
 		if (ball.vy < 0 && ball.y - ball.r < 0) {
       ball.y -= ball.vy * dt;
 			ball.vy = -ball.vy;
 		}
+    if (ball.x - ball.r < 0 && ball.vx < 0) {
+      ball.x -= ball.vx;
+      ball.vx = Math.abs(ball.vx);
+    }
+    if (ball.x + ball.r > 1 && ball.vx > 0) {
+      ball.x -= ball.vx;
+      ball.vx = -Math.abs(ball.vx);
+    }
 	}
   for (var i = 0; i < game.balls.length; i++) {
     for (var j = i + 1; j < game.balls.length; j++) {
@@ -161,7 +170,7 @@ let tick = function(dt) {
 	for (let playerId in game.players) {
 		var player = game.players[playerId];
     if (player.y > 0) {
-		  player.vy += CONSTS.G * dt;
+		  player.vy += CONSTS.PLAYERG * dt;
     }
 		player.y += player.vy * dt;
 		if (player.vy < 0 && player.y < 0) {
