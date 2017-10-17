@@ -4,14 +4,14 @@ Initialization, sends game state and assigns id, color etc:
   type: "init",
   playerId: Int,
   players: [
-    {id, x, y, color},
+    {id, x, y, w, h, color},
     ...
   ]
 }
 New Player, adds new player to the game:
 {
   type: "newplayer",
-  player: {id, x, y, w, color}
+  player: {id, x, y, w, h, color}
 }
 Remove Player, removes player:
 {
