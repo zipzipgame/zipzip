@@ -8,14 +8,14 @@ Initialization, sends game state and assigns id, color etc:
     ...
   ],
   players: [
-    {id, x, y, w, h, color},
+    {id, x, y, w, h, name, color},
     ...
   ]
 }
 New Player, adds new player to the game:
 {
   type: "newplayer",
-  player: {id, x, y, w, h, color}
+  player: {id, x, y, w, h, name, color}
 }
 Remove Player, removes player:
 {
@@ -36,7 +36,13 @@ Update, updates game state periodically:
 }
 
 Client -> Server
+Init:
+{
+  type: "init",
+  name: String
+}
 Action:
 {
+  type: "action",
   action: "jump" OR "left" OR "right" OR "stop"
 }

@@ -160,6 +160,9 @@ function ballCollision(b1, b2) {
   b2.vy = v2a_n * vecy + v2p * vecx;
 }
 
+function playerBallCollision() {
+}
+
 let tick = function(dt) {
 	for (let ball of game.balls) {
 		ball.vy += CONSTS.BALLG * dt;
