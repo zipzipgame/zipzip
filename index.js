@@ -33,6 +33,14 @@ class Game {
 		}
 		players[id] = player;
 	}
+	
+	markBall(idx, playerId) {
+		this.balls[idx].player = playerId;
+	}
+
+	unmarkBall(idx) {
+		this.balls[idx].player = -1;
+	}
 }
 
 
@@ -41,24 +49,25 @@ let balls = [{
 		y:   0.2,
 		vy: -0.01,
 		vx:  0.0,
-		r:   0.07,
+		r:   0.03,
+		player: -1,
 	}, {
 		x:   0.1,
 		y:   0.3,
 		vy: -0.01,
 		vx:  0.03,
-		r:   0.05,
+		r:   0.02,
+		player: -1,
 	}];
 
 let game = new Game(balls);
 
-
 const CONSTS = {
-  VX: .2,
-  JUMP_V: .4,
-  BALLG: -.3,
-  PLAYERG: -1.4,
-  BALL_MAXV: .5,
+  VX: .15,
+  JUMP_V: .2,
+  BALLG: -.15,
+  PLAYERG: -1.1,
+  BALL_MAXV: .2,
 };
 
 id = 2;
@@ -84,7 +93,7 @@ wsServer.on('request', function(request) {
 	msgPlayers = [];
 	for (var p in game.players) {
 		let pl = game.players[p];
-		msgPlayers.push({id: pl.id, name:pl.name, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color});
+		msgPlayers.push({id: pl.id, name:pl.name, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color, point: pl.point});
 	}
 
 	message = {
@@ -106,17 +115,19 @@ wsServer.on('request', function(request) {
 				name: message.name,
 				x: 0.2,
 				y: 0.1,
-				w: 0.02,
-				h: 0.06,
+				w: 0.008,
+				h: 0.02,
 				vx: 0.0,
 				vy: 0.0,
 				moveState: 'stop',
 				color: colors[id % colors.length],
+        point: 0,
+        pointT: 0
 			};
 			var pl = player;
 			let msg = {
 				type: 'newplayer',
-				player: {id: pl.id, name: pl.name, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color},
+				player: {id: pl.id, name: pl.name, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color, point: pl.point},
 			};
 			sendToAll(msg);
 
@@ -262,6 +273,17 @@ function playerBallCollision(p, b) {
     if (p.vy > 0 && b.vy < p.vy / 2) {
       b.vy += p.vy / 5;
     }
+  } 
+	for (let ball of game.balls) {
+    if (ball.player == p.id) {
+      ball.player = -1;
+    }
+  }
+  b.player = p.id;
+  b.color = p.color;
+  if (p.pointT < new Date().getTime() - 500) {
+    p.point++;
+    p.pointT = new Date().getTime();
   }
 }
 
@@ -277,6 +299,10 @@ let tick = function(dt) {
 		if (ball.vy < 0 && ball.y - ball.r < 0) {
       ball.y -= ball.vy * dt;
 			ball.vy = -ball.vy;
+      if (ball.player != -1) {
+        game.players[ball.player].point = Math.floor(game.players[ball.player].point / 2);
+      }
+      ball.player = -1;
 		}
     if (ball.x - ball.r < 0 && ball.vx < 0) {
       ball.x -= ball.vx * dt;
@@ -321,7 +347,7 @@ setInterval(function(){
 	let abemal = {};
 	for (let playerId in game.players) {
 		var p = game.players[playerId];
-		abemal[p.id] = {x: p.x, y: p.y};
+		abemal[p.id] = {x: p.x, y: p.y, point: p.point};
 	}
 	let message = {
 		type: "update",

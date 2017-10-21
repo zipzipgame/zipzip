@@ -5,31 +5,48 @@ html, body {
   padding: 0px;
   margin: 0px;
 }
+#dom_debug {
+  display: none;
+  position: absolute;
+  width: 100%;
+  height: 30%;
+  padding-top: 5px;
+  background: rgba(0,0,0,.1);
+  font-family: Courier New;
+  font-size: 12px;
+  overflow-y: scroll;
+}
+.debug-dot {
+  color: red;
+  width: 5px;
+  height: 5px;
+}
+canvas {
+  touch-action: none;
+}
 </style>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="touchtomouse.js"></script>
 </head>
 <body>
   <canvas id="canvas" style="z-index: 0; position: absolute; top: 0px; left: 0px;"></canvas>
-  <div id="dom_initdiv" style="z-index: 100; margin-top: 100px; position: absolute; width: 100%; height: 100%;">
+  <div id="dom_debug"></div>
+  <div id="dom_initdiv" style="z-index: 2; margin-top: 100px; position: absolute; width: 100%; height: 100%;">
   <center>
   <input type="text" placeholder="Nick" id="dom_nick"><br>
   <input type="submit" value="Start Game" onclick="startGame()" id="dom_start">
   </center>
   </div>
 <script>
-singleTouchToMouse(canvas, true);
-
 var HOST = location.origin.replace(/^http/, 'ws');
-
-var messageLogging = false;
+var DEBUG = !!location.href.match("debug=1");
+var MSGLOG = !!location.href.match("msglog=1");
 
 var ctx = canvas.getContext("2d");
 var socket = null;
 
 var game = {
-  started: false,
-  myId: 0,
+  joined: false,
+  playerId: 0,
   balls: [],
   players: []
 };
@@ -38,6 +55,28 @@ var nicks = ["banjo", "reis", "kuki", "mustaa", "emes", "ertem", "patates", "lom
 dom_nick.value = nicks[Math.floor(Math.random() * nicks.length)];
 
 initConnection(HOST);
+
+if (DEBUG) {
+  dom_debug.style.display = "block";
+  var oldLog = console.log;
+  console.log = function (msg) {
+    oldLog.apply(console, arguments);
+    if (!(msg instanceof String)) {
+      msg = JSON.stringify(msg);
+    }
+    var dot = document.createElement("span");
+    dot.innerHTML = "->";
+    dot.className = "debug-dot";
+    if (dom_debug.firstChild) {
+      dom_debug.insertBefore(document.createElement("br"), dom_debug.firstChild);
+      dom_debug.insertBefore(document.createTextNode(msg), dom_debug.firstChild);
+      dom_debug.insertBefore(dot, dom_debug.firstChild);
+    } else {
+      dom_debug.appendChild(document.createTextNode(msg));
+      dom_debug.insertBefore(dot, dom_debug.firstChild);
+    }
+  }
+}
 
 function startGame() {
   var nick = dom_nick.value;
@@ -59,7 +98,7 @@ function initConnection(address) {
 }
 
 function handleMessage(msg) {
-  if (messageLogging && msg.type != "update") {
+  if (MSGLOG && msg.type != "update") {
     console.log(msg);
   }
   switch (msg.type) {
@@ -79,7 +118,7 @@ function handleMessage(msg) {
 }
 
 function handleInit(msg) {
-  game.myId = msg.yourId;
+  game.playerId = msg.yourId;
   game.balls = msg.balls;
   game.players = msg.players;
 }
@@ -105,6 +144,7 @@ function handleUpdate(msg) {
     if (msgplayer) {
       player.x = msgplayer.x;
       player.y = msgplayer.y;
+      player.point = msgplayer.point;
     }
   }
   render();
@@ -114,9 +154,14 @@ function sendInit(nick) {
   socket.send(JSON.stringify({
     type: "init", name: nick
   }));
+  game.joined = true;
 }
 
 function sendAction(action) {
+  if (!game.joined) {
+    return;
+  }
+
   socket.send(JSON.stringify({
     type: "action", action: action
   }));
@@ -144,7 +189,11 @@ function render() {
     var ball = game.balls[i];
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.r, 0, 2 * Math.PI);
-    ctx.fillStyle = "gray";
+    if (ball.player == -1) {
+      ctx.fillStyle = "gray";
+    } else {
+      ctx.fillStyle = ball.color;
+    }
     ctx.fill();
   }
 
@@ -155,7 +204,8 @@ function render() {
   ctx.textBaseline = "bottom";
   ctx.fillStyle = "black";
   for (var i = 0; i < game.players.length; i++) {
-    ctx.fillText(player.name, player.x * canvas.width, canvas.height - (player.y + player.h * 1.1) * canvas.width);
+    var player = game.players[i];
+    ctx.fillText(player.name + " " + player.point, player.x * canvas.width, canvas.height - (player.y + player.h * 1.1) * canvas.width);
   }
 
   ctx.strokeStyle = "black";
@@ -163,62 +213,67 @@ function render() {
 }
 
 var buttonState = {
-  left: false,
-  right: false,
-  jump: false
+  jump: false,
+  lastDir: null
 };
 
 canvas.ontouchstart = function (e) {
-  var x = e.target.clientX - canvas.getBoundingClientRect().left;
-  var y = e.target.clientX - canvas.getBoundingClientRect().right;
-  if (x < canvas.width / 3) {
-    sendAction("left");
-    buttonState.left = e.target.identifier;
-  } else if (x < canvas.width * 2 / 3) {
-    sendAction("jump");
-  } else {
-    sendAction("right");
-    buttonState.right = e.target.identifier;
+  for (var i = 0; i < e.changedTouches.length; i++) {
+    var touch = e.changedTouches[i];
+    var x = touch.clientX - canvas.getBoundingClientRect().left;
+    var y = touch.clientY - canvas.getBoundingClientRect().right;
+    if (x < canvas.width / 3) {
+      sendAction("left");
+      buttonState.lastDir = touch.identifier;
+    } else if (x < canvas.width * 2 / 3) {
+      sendAction("jump");
+    } else {
+      sendAction("right");
+      buttonState.lastDir = touch.identifier;
+    }
   }
 };
 
 canvas.ontouchend = canvas.ontouchcancel = function (e) {
-  if (e.target.identifier == buttonState.left) {
-    sendAction("stop");
-    buttonState.left = false;
-  }
-  if (e.target.identifier == buttonState.right) {
-    sendAction("stop");
-    buttonState.right = false;
+  for (var i = 0; i < e.changedTouches.length; i++) {
+    var touch = e.changedTouches[i];
+    if (touch.identifier == buttonState.lastDir) {
+      sendAction("stop");
+      buttonState.lastDir = null;
+    }
+    if (touch.identifier == buttonState.lastDir) {
+      sendAction("stop");
+      buttonState.lastDir = null;
+    }
   }
 };
 
 document.onkeydown = function (e) {
-  if (e.keyCode == 37 && buttonState.left == false) {
+  if (e.keyCode == 37 && buttonState.lastDir != "left") {
     sendAction("left");
-    buttonState.left = true;
+    buttonState.lastDir = "left";
   }
-  if (e.keyCode == 38 && buttonState.jump == false) {
+  if ((e.keyCode == 38 || e.keyCode == 32) && buttonState.jump == false) {
     sendAction("jump");
     buttonState.jump = true;
   }
-  if (e.keyCode == 39 && buttonState.right == false) {
+  if (e.keyCode == 39 && buttonState.lastDir != "right") {
     sendAction("right");
-    buttonState.right = true;
+    buttonState.lastDir = "right";
   }
 }
 
 document.onkeyup = function (e) {
-  if (e.keyCode == 37 && buttonState.left == true) {
+  if (e.keyCode == 37 && buttonState.lastDir == "left") {
     sendAction("stop");
-    buttonState.left = false;
+    buttonState.lastDir = null;
   }
-  if (e.keyCode == 38 && buttonState.jump == true) {
+  if ((e.keyCode == 38 || e.keyCode == 32) && buttonState.jump == true) {
     buttonState.jump = false;
   }
-  if (e.keyCode == 39 && buttonState.right == true) {
+  if (e.keyCode == 39 && buttonState.lastDir == "right") {
     sendAction("stop");
-    buttonState.right = false;
+    buttonState.lastDir = null;
   }
 }
 </script>
