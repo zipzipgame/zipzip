@@ -30,11 +30,11 @@ var game = {
 };
 
 var CONSTS = {
-  VX: .2,
-  JUMP_V: .4,
-  BALLG: -.3,
-  PLAYERG: -1.4,
-  BALL_MAXV: .5,
+  VX: .15,
+  JUMP_V: .2,
+  BALLG: -.15,
+  PLAYERG: -1.1,
+  BALL_MAXV: .3,
 };
 
 id = 2;
