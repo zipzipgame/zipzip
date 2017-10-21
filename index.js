@@ -242,6 +242,7 @@ function playerBallCollision(p, b) {
     }
   }
   b.player = p.id;
+  b.color = p.color;
   player.point++;
 }
 

@@ -189,7 +189,11 @@ function render() {
     var ball = game.balls[i];
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.r, 0, 2 * Math.PI);
-    ctx.fillStyle = "gray";
+    if (ball.player == -1) {
+      ctx.fillStyle = "gray";
+    } else {
+      ctx.fillStyle = ball.color;
+    }
     ctx.fill();
   }
 
