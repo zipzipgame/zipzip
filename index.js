@@ -19,12 +19,14 @@ var game = {
 		vy: -0.01,
 		vx:  0.0,
 		r:   0.03,
+    player: -1
 	}, {
 		x:   0.1,
 		y:   0.3,
 		vy: -0.01,
 		vx:  0.03,
 		r:   0.02,
+    player: -1
 	}],
 	players: {},
 };
@@ -92,7 +94,7 @@ wsServer.on('request', function(request) {
 			var pl = player;
 			let msg = {
 				type: 'newplayer',
-				player: {id: pl.id, name: pl.name, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color},
+				player: {id: pl.id, name: pl.name, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color, point: 0},
 			};
 			sendToAll(msg);
 
@@ -239,6 +241,8 @@ function playerBallCollision(p, b) {
       b.vy += p.vy / 5;
     }
   }
+  b.player = p.id;
+  player.point++;
 }
 
 let tick = function(dt) {
@@ -253,6 +257,10 @@ let tick = function(dt) {
 		if (ball.vy < 0 && ball.y - ball.r < 0) {
       ball.y -= ball.vy * dt;
 			ball.vy = -ball.vy;
+      if (ball.id != -1) {
+        game.players[ball.player].point = Math.floor(game.players[ball.player] / 2);
+      }
+      ball.id = -1;
 		}
     if (ball.x - ball.r < 0 && ball.vx < 0) {
       ball.x -= ball.vx * dt;
@@ -297,7 +305,7 @@ setInterval(function(){
 	let abemal = {};
 	for (let playerId in game.players) {
 		var p = game.players[playerId];
-		abemal[p.id] = {x: p.x, y: p.y};
+		abemal[p.id] = {x: p.x, y: p.y, point: p.point};
 	}
 	let message = {
 		type: "update",

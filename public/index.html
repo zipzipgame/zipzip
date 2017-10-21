@@ -144,6 +144,7 @@ function handleUpdate(msg) {
     if (msgplayer) {
       player.x = msgplayer.x;
       player.y = msgplayer.y;
+      player.point = msgplayer.point;
     }
   }
   render();
@@ -199,7 +200,8 @@ function render() {
   ctx.textBaseline = "bottom";
   ctx.fillStyle = "black";
   for (var i = 0; i < game.players.length; i++) {
-    ctx.fillText(player.name, player.x * canvas.width, canvas.height - (player.y + player.h * 1.1) * canvas.width);
+    var player = game.players[i];
+    ctx.fillText(player.name + " " + player.point, player.x * canvas.width, canvas.height - (player.y + player.h * 1.1) * canvas.width);
   }
 
   ctx.strokeStyle = "black";
