@@ -34,7 +34,7 @@ var CONSTS = {
   JUMP_V: .2,
   BALLG: -.15,
   PLAYERG: -1.1,
-  BALL_MAXV: .3,
+  BALL_MAXV: .2,
 };
 
 id = 2;
