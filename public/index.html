@@ -37,24 +37,47 @@ canvas {
   </center>
   </div>
 <script>
-var HOST = location.origin.replace(/^http/, 'ws');
+var WSHOST = location.origin.replace(/^http/, 'ws');
 var DEBUG = !!location.href.match("debug=1");
 var MSGLOG = !!location.href.match("msglog=1");
 
 var ctx = canvas.getContext("2d");
-var socket = null;
 
-var game = {
-  joined: false,
-  playerId: 0,
-  balls: [],
-  players: []
-};
+var game;
 
 var nicks = ["banjo", "reis", "kuki", "mustaa", "emes", "ertem", "patates", "lombak"];
 dom_nick.value = nicks[Math.floor(Math.random() * nicks.length)];
 
-initConnection(HOST);
+initConnection();
+
+function initConnection() {
+  renderConnecting();
+  game = {
+    socket: null,
+    joined: false,
+    playerId: 0,
+    balls: [],
+    players: []
+  };
+  game.socket = new WebSocket(WSHOST);
+  game.socket.onopen = function (event) {
+    renderLogin();
+  };
+  game.socket.onmessage = function (event) {
+    handleMessage(JSON.parse(event.data));
+  };
+  game.socket.onerror = function (event) {
+    console.log(event);
+  };
+  game.socket.onclose = function (event) {
+    initCollection();
+  };
+}
+
+function renderConnecting() {
+}
+function renderLogin() {
+}
 
 if (DEBUG) {
   dom_debug.style.display = "block";
@@ -90,12 +113,6 @@ function startGame() {
   ctx.strokeRect(0, 0, canvas.width, canvas.height);
 }
 
-function initConnection(address) {
-  socket = new WebSocket(address);
-  socket.onmessage = function (event) {
-    handleMessage(JSON.parse(event.data));
-  }
-}
 
 function handleMessage(msg) {
   if (MSGLOG && msg.type != "update") {
@@ -151,7 +168,7 @@ function handleUpdate(msg) {
 }
 
 function sendInit(nick) {
-  socket.send(JSON.stringify({
+  game.socket.send(JSON.stringify({
     type: "init", name: nick
   }));
   game.joined = true;
@@ -162,7 +179,7 @@ function sendAction(action) {
     return;
   }
 
-  socket.send(JSON.stringify({
+  game.socket.send(JSON.stringify({
     type: "action", action: action
   }));
 }
