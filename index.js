@@ -12,8 +12,31 @@ wsServer = new WebSocketServer({
 	httpServer: server
 });
 
-var game = {
-	balls: [{
+class Game {
+	constructor(balls, players) {
+		this.balls = balls;
+		this.players = players if players else {};
+	}
+
+	get balls() {
+		return this.balls;
+	}
+
+	get players() {
+		return this.players;
+	}
+
+	addPlayer(player, id) {
+		if (id in players) {
+			console.log("Player id "+id+" is already being used!");
+			return;
+		}
+		players[id] = player;
+	}
+}
+
+
+let balls = [{
 		x:   0.5,
 		y:   0.2,
 		vy: -0.01,
@@ -25,11 +48,12 @@ var game = {
 		vy: -0.01,
 		vx:  0.03,
 		r:   0.05,
-	}],
-	players: {},
-};
+	}];
 
-var CONSTS = {
+let game = new Game(balls);
+
+
+const CONSTS = {
   VX: .2,
   JUMP_V: .4,
   BALLG: -.3,
