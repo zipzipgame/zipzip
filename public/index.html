@@ -253,7 +253,7 @@ document.onkeydown = function (e) {
     sendAction("left");
     buttonState.lastDir = "left";
   }
-  if (e.keyCode == 38 && buttonState.jump == false) {
+  if ((e.keyCode == 38 || e.keyCode == 32) && buttonState.jump == false) {
     sendAction("jump");
     buttonState.jump = true;
   }
@@ -268,7 +268,7 @@ document.onkeyup = function (e) {
     sendAction("stop");
     buttonState.lastDir = null;
   }
-  if (e.keyCode == 38 && buttonState.jump == true) {
+  if ((e.keyCode == 38 || e.keyCode == 32) && buttonState.jump == true) {
     buttonState.jump = false;
   }
   if (e.keyCode == 39 && buttonState.lastDir == "right") {

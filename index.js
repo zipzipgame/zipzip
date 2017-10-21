@@ -90,7 +90,8 @@ wsServer.on('request', function(request) {
 				vy: 0.0,
 				moveState: 'stop',
 				color: colors[id % colors.length],
-        point: 0
+        point: 0,
+        pointT: 0
 			};
 			var pl = player;
 			let msg = {
@@ -249,7 +250,10 @@ function playerBallCollision(p, b) {
   }
   b.player = p.id;
   b.color = p.color;
-  p.point++;
+  if (p.pointT < new Date().getTime() - 500) {
+    p.point++;
+    p.pointT = new Date().getTime();
+  }
 }
 
 let tick = function(dt) {
