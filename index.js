@@ -258,10 +258,10 @@ let tick = function(dt) {
 		if (ball.vy < 0 && ball.y - ball.r < 0) {
       ball.y -= ball.vy * dt;
 			ball.vy = -ball.vy;
-      if (ball.id != -1) {
+      if (ball.player != -1) {
         game.players[ball.player].point = Math.floor(game.players[ball.player] / 2);
       }
-      ball.id = -1;
+      ball.player = -1;
 		}
     if (ball.x - ball.r < 0 && ball.vx < 0) {
       ball.x -= ball.vx * dt;
