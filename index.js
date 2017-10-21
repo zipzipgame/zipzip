@@ -242,6 +242,11 @@ function playerBallCollision(p, b) {
       b.vy += p.vy / 5;
     }
   }
+	for (let ball of game.balls) {
+    if (ball.player == p.id) {
+      ball.player = -1;
+    }
+  }
   b.player = p.id;
   b.color = p.color;
   p.point++;
@@ -260,7 +265,7 @@ let tick = function(dt) {
       ball.y -= ball.vy * dt;
 			ball.vy = -ball.vy;
       if (ball.player != -1) {
-        game.players[ball.player].point = Math.floor(game.players[ball.player] / 2);
+        game.players[ball.player].point = Math.floor(game.players[ball.player].point / 2);
       }
       ball.player = -1;
 		}
