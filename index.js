@@ -62,7 +62,7 @@ wsServer.on('request', function(request) {
 	msgPlayers = [];
 	for (var p in game.players) {
 		let pl = game.players[p];
-		msgPlayers.push({id: pl.id, name:pl.name, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color});
+		msgPlayers.push({id: pl.id, name:pl.name, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color, point: pl.point});
 	}
 
 	message = {
@@ -90,11 +90,12 @@ wsServer.on('request', function(request) {
 				vy: 0.0,
 				moveState: 'stop',
 				color: colors[id % colors.length],
+        point: 0
 			};
 			var pl = player;
 			let msg = {
 				type: 'newplayer',
-				player: {id: pl.id, name: pl.name, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color, point: 0},
+				player: {id: pl.id, name: pl.name, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color, point: pl.point},
 			};
 			sendToAll(msg);
 
@@ -243,7 +244,7 @@ function playerBallCollision(p, b) {
   }
   b.player = p.id;
   b.color = p.color;
-  player.point++;
+  p.point++;
 }
 
 let tick = function(dt) {
