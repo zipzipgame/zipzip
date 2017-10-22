@@ -331,3 +331,5 @@ setInterval(function(){
 	tick(0.025);
   game.sendUpdate();
 }, 25);
+
+// vim: noexpandtab
