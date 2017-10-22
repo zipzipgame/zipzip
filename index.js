@@ -12,39 +12,88 @@ wsServer = new WebSocketServer({
 	httpServer: server
 });
 
+class Player {
+	constructor(id, name, color) {
+	  this.id = id;
+		this.name = name;
+		this.x = 0.2;
+		this.y = 0.1;
+		this.w = 0.008;
+		this.h = 0.02;
+		this.vx = 0.0;
+		this.vy = 0.0;
+		this.moveState = 'stop';
+		this.color = color;
+		this.score = 0;
+	}
+  getInitObj() {
+    return {id: this.id, name:this.name, x: this.x, y: this.y, w: this.w,
+      h: this.h, color: this.color, score: this.score};
+  }
+  getUpdateObj() {
+    return {id: this.id, x: this.x, y: this.y, score: this.score};
+  }
+}
+
 class Game {
-	constructor(balls, players) {
+	constructor(balls, players, connections) {
 		this.balls = balls;
-		this.players = players if players else {};
+		this.players = players || {};
+    // playerId -> connection
+		this.connections = connections || {};
+    this.nextId = 5;
 	}
-
-	get balls() {
-		return this.balls;
-	}
-
-	get players() {
-		return this.players;
-	}
-
-	addPlayer(player, id) {
-		if (id in players) {
-			console.log("Player id "+id+" is already being used!");
-			return;
-		}
-		players[id] = player;
-	}
-	
 	markBall(idx, playerId) {
 		this.balls[idx].player = playerId;
 	}
-
 	unmarkBall(idx) {
 		this.balls[idx].player = -1;
 	}
+	addConnection(connection) {
+    let playerId = this.nextId++;
+    this.connections[playerId] = connection;
+    let objs = Object.values(this.players).map(p => p.getInfoObj);
+  	let msg = {
+  		type: "init",
+  		playerId: playerId,
+  		players: objs,
+  		balls: game.balls,
+  	};
+  	connection.send(JSON.stringify(msg));
+    console.log("Player " + playerId + " has connected.");
+    return playerId;
+	}
+  addPlayer(player) {
+    this.players[player.id] = player;
+    let msg = {
+      type: 'newplayer',
+      player: player.getInitObj(),
+    };
+    this.sendToAll(msg);
+  }
+  closeConnection(playerId) {
+    delete connections[playerId];
+    if (playerId in players) {
+      delete players[playerId];
+    }
+  }
+  sendToAll(msg) {
+    for (let c in this.connections) {
+  		this.connections[c].send(JSON.stringify(msg));
+  	}
+  }
+  sendUpdate() {
+    let msg = {
+  		type: "update",
+  		balls: this.balls,
+  		players: Object.values(this.players).map(p => p.getUpdateObj()),
+  	};
+    this.sendToAll(msg);
+	console.log(msg);
+  }
 }
 
-
-let balls = [{
+const initBalls = [{
 		x:   0.5,
 		y:   0.2,
 		vy: -0.01,
@@ -60,96 +109,35 @@ let balls = [{
 		player: -1,
 	}];
 
-let game = new Game(balls);
+const game = new Game(initBalls);
 
 const CONSTS = {
-  VX: .15,
-  JUMP_V: .2,
-  BALLG: -.15,
-  PLAYERG: -1.1,
-  BALL_MAXV: .2,
+	VX: .15,
+ 	JUMP_V: .2,
+ 	BALLG: -.15,
+ 	PLAYERG: -1.1,
+ 	BALL_MAXV: .2,
 };
 
-id = 2;
-
-colors = ['blue', 'red', 'purple', 'cyan', 'yellow', 'pink', 'black'];
-
-connections = {};
-
-var sendToAll = function (msg) {
-	for (var c in connections) {
-		connections[c].send(JSON.stringify(msg));
-	}
-}
+const colors = ['blue', 'red', 'purple', 'cyan', 'yellow', 'pink', 'black'];
 
 wsServer.on('request', function(request) {
-	var connection = request.accept(null, request.origin);
-	var playerId = id++;
-	
-	connections[playerId] = connection;
-
-	console.log("Player " + playerId + " has connected.");
-
-	msgPlayers = [];
-	for (var p in game.players) {
-		let pl = game.players[p];
-		msgPlayers.push({id: pl.id, name:pl.name, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color, point: pl.point});
-	}
-
-	message = {
-		type: "init",
-		playerId: playerId,
-		players: msgPlayers,
-		balls: game.balls,
-	}
-	
-	connection.send(JSON.stringify(message));
+	let connection = request.accept(null, request.origin);
+	let playerId = game.addConnection(connection);
 
 	connection.on('message', function(message) {
 		var message = JSON.parse(message.utf8Data);
-		console.log(message.type);
-		if (message.type === 'init') {
-				console.log(message);
-			var player = {
-				id: playerId,
-				name: message.name,
-				x: 0.2,
-				y: 0.1,
-				w: 0.008,
-				h: 0.02,
-				vx: 0.0,
-				vy: 0.0,
-				moveState: 'stop',
-				color: colors[id % colors.length],
-        point: 0,
-        pointT: 0
-			};
-			var pl = player;
-			let msg = {
-				type: 'newplayer',
-				player: {id: pl.id, name: pl.name, x: pl.x, y: pl.y, w: pl.w, h: pl.h, color: pl.color, point: pl.point},
-			};
-			sendToAll(msg);
-
-			game.players[playerId] = player;
+	  if (message.type === 'init') {
+      let player = new Player(playerId, message.name, colors[playerId % colors.length]);
+      game.addPlayer(player);
 		}
 		if (message.type === 'action') {
-				let action = message.action;
-				if (action === 'jump') {
-					if (game.players[playerId].y == 0) {
-						game.players[playerId].vy = CONSTS.JUMP_V;
-					}
-					console.log('jump');
-				} else if (action === 'left') {
-					game.players[playerId].moveState = 'left';
-					console.log('left');
-				} else if (action === 'right') {
-					game.players[playerId].moveState = 'right';
-					console.log('right');
-				} else if (action === 'stop') {
-					game.players[playerId].moveState = 'stop';
-					console.log('stop');
-				}
+      let action = message.action;
+			if (action === 'jump' && game.players[playerId].y == 0) {
+				game.players[playerId].vy = CONSTS.JUMP_V;
+			} else if (action === 'left' || action === 'right' || action === 'stop') {
+				game.players[playerId].moveState = action;
+			}
 		}
 	});
 
@@ -197,7 +185,7 @@ function ballCollision(b1, b2) {
   // Velocity perpendicular
   var v1p = -b1.vx * vecy + b1.vy * vecx;
   var v2p = -b2.vx * vecy + b2.vy * vecx;
-  
+
   if (v1a < v2a) {
     return;
   }
@@ -273,18 +261,15 @@ function playerBallCollision(p, b) {
     if (p.vy > 0 && b.vy < p.vy / 2) {
       b.vy += p.vy / 5;
     }
-  } 
+  }
 	for (let ball of game.balls) {
-    if (ball.player == p.id) {
-      ball.player = -1;
-    }
-  }
-  b.player = p.id;
-  b.color = p.color;
-  if (p.pointT < new Date().getTime() - 500) {
-    p.point++;
-    p.pointT = new Date().getTime();
-  }
+		if (ball.player == p.id) {
+			ball.player = -1;
+		}
+	}
+	b.player = p.id;
+	b.color = p.color;
+	p.score++;
 }
 
 let tick = function(dt) {
@@ -300,7 +285,8 @@ let tick = function(dt) {
       ball.y -= ball.vy * dt;
 			ball.vy = -ball.vy;
       if (ball.player != -1) {
-        game.players[ball.player].point = Math.floor(game.players[ball.player].point / 2);
+		  console.log(ball.player);
+        game.players[ball.player].score = Math.floor(game.players[ball.player].score / 2);
       }
       ball.player = -1;
 		}
@@ -341,20 +327,7 @@ let tick = function(dt) {
 	}
 }
 
-
 setInterval(function(){
 	tick(0.025);
-	let abemal = {};
-	for (let playerId in game.players) {
-		var p = game.players[playerId];
-		abemal[p.id] = {x: p.x, y: p.y, point: p.point};
-	}
-	let message = {
-		type: "update",
-		balls: game.balls,
-		players: abemal,
-	};
-	sendToAll(message);
+  game.sendUpdate();
 }, 25);
-
-
