@@ -263,6 +263,7 @@ function playerBallCollision(p, b) {
     if (p.vy > 0 && b.vy < p.vy / 2) {
       b.vy += p.vy / 5;
     }
+	b.vy += .03;
   }
 	for (let ball of game.balls) {
 		if (ball.player == p.id) {
