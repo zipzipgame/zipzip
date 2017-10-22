@@ -122,9 +122,9 @@ const game = new Game(initBalls);
 
 const CONSTS = {
 	VX: .15,
- 	JUMP_V: .2,
+ 	JUMP_V: .4,
  	BALLG: -.15,
- 	PLAYERG: -1.1,
+ 	PLAYERG: -2.0,
  	BALL_MAXV: .2,
 };
 
@@ -270,7 +270,6 @@ function playerBallCollision(p, b) {
 		}
 	}
 	b.player = p.id;
-	b.color = p.color;
 	p.score++;
 }
 
