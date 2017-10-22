@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "engines": {
-	"8.5.0"
+	"node": "8.5.0"
   },
   "dependencies": {
     "express": "4.13.4",
