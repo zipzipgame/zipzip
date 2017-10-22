@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "engines": {
+	"8.5.0"
+  },
   "dependencies": {
     "express": "4.13.4",
     "websocket": "^1.0.24"
