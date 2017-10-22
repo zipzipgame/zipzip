@@ -239,6 +239,7 @@ var buttonState = {
 };
 
 canvas.ontouchstart = function (e) {
+	e.preventDefault();
   for (var i = 0; i < e.changedTouches.length; i++) {
     var touch = e.changedTouches[i];
     var x = touch.clientX - canvas.getBoundingClientRect().left;
@@ -256,6 +257,7 @@ canvas.ontouchstart = function (e) {
 };
 
 canvas.ontouchend = canvas.ontouchcancel = function (e) {
+	e.preventDefault();
   for (var i = 0; i < e.changedTouches.length; i++) {
     var touch = e.changedTouches[i];
     if (touch.identifier == buttonState.lastDir) {
