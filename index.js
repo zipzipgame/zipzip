@@ -89,7 +89,6 @@ class Game {
   		players: Object.values(this.players).map(p => p.getUpdateObj()),
   	};
     this.sendToAll(msg);
-	console.log(msg);
   }
 }
 
@@ -285,7 +284,6 @@ let tick = function(dt) {
       ball.y -= ball.vy * dt;
 			ball.vy = -ball.vy;
       if (ball.player != -1) {
-		  console.log(ball.player);
         game.players[ball.player].score = Math.floor(game.players[ball.player].score / 2);
       }
       ball.player = -1;

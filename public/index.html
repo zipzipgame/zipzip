@@ -1,3 +1,4 @@
+<!DocTYpE HTmL>
 <html>
 <head>
 <style>
@@ -30,11 +31,16 @@ canvas {
 <body>
   <canvas id="canvas" style="z-index: 0; position: absolute; top: 0px; left: 0px;"></canvas>
   <div id="dom_debug"></div>
-  <div id="dom_initdiv" style="z-index: 2; margin-top: 100px; position: absolute; width: 100%; height: 100%;">
+  <div id="dom_initdiv" style="display: none; z-index: 2; margin-top: 100px; position: absolute; width: 100%; height: 100%;">
   <center>
   <input type="text" placeholder="Nick" id="dom_nick"><br>
   <input type="submit" value="Start Game" onclick="startGame()" id="dom_start">
   </center>
+  </div>
+  <div id="dom_connecting" style="z-index: 3; padding-top: 100; position: absolute; width: 100%; height: 100%;">
+	  <center>
+		  <h1>Connecting servers...</h1>
+	  </center>
   </div>
 <script>
 var WSHOST = location.origin.replace(/^http/, 'ws');
@@ -46,7 +52,6 @@ var ctx = canvas.getContext("2d");
 var game;
 
 var nicks = ["banjo", "reis", "kuki", "mustaa", "emes", "ertem", "patates", "lombak"];
-dom_nick.value = nicks[Math.floor(Math.random() * nicks.length)];
 
 initConnection();
 
@@ -57,7 +62,7 @@ function initConnection() {
     joined: false,
     playerId: 0,
     balls: [],
-    players: []
+	players: {}
   };
   game.socket = new WebSocket(WSHOST);
   game.socket.onopen = function (event) {
@@ -70,13 +75,19 @@ function initConnection() {
     console.log(event);
   };
   game.socket.onclose = function (event) {
-    initCollection();
+    initConnection();
   };
 }
 
 function renderConnecting() {
+	dom_connecting.style.display = "block";
+	dom_initdiv.style.display = "none";
 }
+
 function renderLogin() {
+	dom_connecting.style.display = "none";
+	dom_initdiv.style.display = "block";
+	dom_nick.value = nicks[Math.floor(Math.random() * nicks.length)];
 }
 
 if (DEBUG) {
@@ -137,32 +148,27 @@ function handleMessage(msg) {
 function handleInit(msg) {
   game.playerId = msg.yourId;
   game.balls = msg.balls;
-  game.players = msg.players;
+  for (var i = 0; i < msg.players.length; i++) {
+	  game.players[msg.players[i].id] = msg.players[i];
+  }
 }
 
 function handleNewPlayer(msg) {
-  game.players.push(msg.player);
+  game.players[msg.player.id] = msg.player;
 }
 
 function handleRemovePlayer(msg) {
-  for (var i = 0; i < game.players.length; i++) {
-    if (game.players[i].id == msg.playerId) {
-      game.players.splice(i, 1);
-      break;
-    }
-  }
+  delete game.players[msg.playerId]; 
 }
 
 function handleUpdate(msg) {
   game.balls = msg.balls;
-  for (var i = 0; i < game.players.length; i++) {
-    var player = game.players[i];
-    var msgplayer = msg.players[player.id];
-    if (msgplayer) {
-      player.x = msgplayer.x;
-      player.y = msgplayer.y;
-      player.point = msgplayer.point;
-    }
+  for (var i = 0; i < msg.players.length; i++) {
+    var msgplayer = msg.players[i];
+    var player = game.players[msgplayer.id];
+	  player.x = msgplayer.x;
+	  player.y = msgplayer.y;
+	  player.score = msgplayer.score;
   }
   render();
 }
@@ -196,11 +202,10 @@ function render() {
   ctx.scale(1, -1);
   ctx.scale(canvas.width, canvas.width);
 
-  for (var i = 0; i < game.players.length; i++) {
-    var player = game.players[i];
+  Object.values(game.players).forEach(function (player) {
     ctx.fillStyle = player.color;
     ctx.fillRect(player.x - player.w / 2, player.y, player.w, player.h);
-  }
+  });
 
   for (var i = 0; i < game.balls.length; i++) {
     var ball = game.balls[i];
@@ -220,10 +225,9 @@ function render() {
   ctx.textAlign = "center";
   ctx.textBaseline = "bottom";
   ctx.fillStyle = "black";
-  for (var i = 0; i < game.players.length; i++) {
-    var player = game.players[i];
-    ctx.fillText(player.name + " " + player.point, player.x * canvas.width, canvas.height - (player.y + player.h * 1.1) * canvas.width);
-  }
+  Object.values(game.players).forEach(function (player) {
+    ctx.fillText(player.name + " " + player.score, player.x * canvas.width, canvas.height - (player.y + player.h * 1.1) * canvas.width);
+  });
 
   ctx.strokeStyle = "black";
   ctx.strokeRect(0, 0, canvas.width, canvas.height);
