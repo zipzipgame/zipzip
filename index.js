@@ -52,7 +52,7 @@ class Game {
 	addConnection(connection) {
     let playerId = this.nextId++;
     this.connections[playerId] = connection;
-    let objs = Object.values(this.players).map(p => p.getInfoObj);
+    let objs = Object.values(this.players).map(p => p.getInitObj());
   	let msg = {
   		type: "init",
   		playerId: playerId,
@@ -72,10 +72,20 @@ class Game {
     this.sendToAll(msg);
   }
   closeConnection(playerId) {
-    delete connections[playerId];
-    if (playerId in players) {
-      delete players[playerId];
+	let msg = {
+		type: 'removeplayer',
+		playerId: playerId,
+	};
+	for (let ball of this.balls) {
+		if (ball.player == playerId) {
+			ball.player = -1;
+		}
+	}
+    delete this.connections[playerId];
+    if (playerId in this.players) {
+      delete this.players[playerId];
     }
+	this.sendToAll(msg);
   }
   sendToAll(msg) {
     for (let c in this.connections) {
@@ -142,18 +152,11 @@ wsServer.on('request', function(request) {
 
 	connection.on('error', function(connection) {
 		console.log('Player ' + playerId + ' has disconnected with error.');
-		delete connections[playerId];
-		delete game.players[playerId];
-		let message = {type: "removeplayer", playerId: playerId};
-		sendToAll(message);
 	});
 
 	connection.on('close', function(connection) {
 		console.log('Player ' + playerId + ' has disconnected.');
-		delete connections[playerId];
-		delete game.players[playerId];
-		let message = {type: "removeplayer", playerId: playerId};
-		sendToAll(message);
+		game.closeConnection(playerId);
 	});
 });
 
