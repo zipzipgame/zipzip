@@ -12,23 +12,6 @@ wsServer = new WebSocketServer({
 	httpServer: server_
 });
 
-const initBalls = [{
-		x:   0.5,
-		y:   0.2,
-		vy: -0.01,
-		vx:  0.0,
-		r:   0.03,
-		player: -1,
-	}, {
-		x:   0.1,
-		y:   0.3,
-		vy: -0.01,
-		vx:  0.03,
-		r:   0.02,
-		player: -1,
-	}];
-
-
 class Server {
 	constructor() {
 		this.publicGames = {};
@@ -130,9 +113,24 @@ class Connection {
 class Game {
 	constructor(id, capacity) {
 		this.id = id;
-		this.balls = initBalls;
+		this.balls = [{
+			x:   0.5,
+			y:   0.2,
+			vy: -0.01,
+			vx:  0.0,
+			r:   0.03,
+			player: -1,
+		}, {
+			x:   0.1,
+			y:   0.3,
+			vy: -0.01,
+			vx:  0.03,
+			r:   0.02,
+			player: -1,
+		}];
+
 		this.connections = {};
-		this.capacity = capacity || 20;
+		this.capacity = capacity || 4;
 	}
 	markBall(idx, playerId) {
 		this.balls[idx].player = playerId;
